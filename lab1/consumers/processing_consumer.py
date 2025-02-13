@@ -17,8 +17,6 @@ conf_producer = {
 
 consumer = Consumer(conf_consumer)
 
-print('Processing consumer running...')
-
 consumer.subscribe(['raw_data'])
 
 scaler = StandardScaler()

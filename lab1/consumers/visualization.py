@@ -1,76 +1,63 @@
 import streamlit as st
 import json
-import time
+from confluent_kafka import Consumer
+from sklearn.metrics import f1_score, accuracy_score
+import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-from confluent_kafka import Consumer, KafkaError
-from sklearn.metrics import accuracy_score, f1_score
-from streamlit_autorefresh import st_autorefresh
 
-st.title("ML Results Visualization")
+st.set_page_config(page_title="ML Results", layout="wide")
 
-# Автообновление страницы каждые 2 секунды
-st_autorefresh(interval=2000, limit=100, key="fizzbuzzcounter")
+if 'y_true' not in st.session_state:
+    st.session_state['y_true'] = []
 
-# Конфигурация Kafka-консюмера
-conf = {
-    'bootstrap.servers': 'localhost:9095',  # Подключаемся к брокеру (тот же, что используется для ML-консюмера)
-    'group.id': 'streamlit-ml-group',
-    'auto.offset.reset': 'earliest'
-}
+if 'y_pred' not in st.session_state:
+    st.session_state['y_pred'] = []
+
+if 'num_processed' not in st.session_state:
+    st.session_state['num_processed'] = []
+
+conf = {'bootstrap.servers': 'localhost:9095',
+        'group.id': 'ml-results',
+        'auto.offset.reset': 'earliest' }
+
 consumer = Consumer(conf)
 consumer.subscribe(['ml_results'])
 
-# Инициализируем переменные в session_state для накопления данных
-if 'y_true' not in st.session_state:
-    st.session_state.y_true = []
-if 'y_pred' not in st.session_state:
-    st.session_state.y_pred = []
-if 'metrics_history' not in st.session_state:
-    st.session_state.metrics_history = pd.DataFrame(columns=['Timestamp', 'Accuracy', 'F1'])
+st.title('ML results')
 
-# Опрашиваем Kafka в течение 1 секунды
-start_time = time.time()
-while time.time() - start_time < 1:
-    msg = consumer.poll(0.5)
-    if msg is None:
-        continue
-    if msg.error():
-        # Игнорируем EOF-ошибки
-        if msg.error().code() != KafkaError._PARTITION_EOF:
-            st.error(f"Consumer error: {msg.error()}")
-        continue
-    # Обрабатываем сообщение
+chart_holder_f1 = st.empty()
+chart_holder_accuracy = st.empty()
+chart_holder_amount = st.empty()
+
+f1_scores = []
+acc_scores = []
+
+while True:
+    msg = consumer.poll(1000)
+
     try:
-        result = json.loads(msg.value().decode('utf-8'))
-        # Предполагается, что сообщение имеет формат:
-        # {'y_true': [...], 'y_pred': [...]}
-        st.session_state.y_true.extend(result.get('y_true', []))
-        st.session_state.y_pred.extend(result.get('y_pred', []))
-    except Exception as e:
-        st.error(f"Ошибка обработки сообщения: {e}")
+        data = json.loads(msg.value().decode('utf-8'))
+    except(Exception):
+        continue
 
-consumer.close()
+    if data:
 
-# Если накоплены данные, вычисляем метрики и обновляем историю
-if len(st.session_state.y_true) > 0:
-    acc = accuracy_score(st.session_state.y_true, st.session_state.y_pred)
-    f1 = f1_score(st.session_state.y_true, st.session_state.y_pred, average='weighted')
-    st.metric("Accuracy", f"{acc:.2f}")
-    st.metric("F1 Score", f"{f1:.2f}")
+        st.session_state['y_true'].extend(data['y_true'])
+        st.session_state['y_pred'].extend(data['y_pred'])
+        st.session_state['num_processed'].append(len(st.session_state['y_true']))
 
-    # Обновляем историю метрик
-    new_row = pd.DataFrame({
-        'Timestamp': [time.strftime("%H:%M:%S")],
-        'Accuracy': [acc],
-        'F1': [f1]
-    })
-    st.session_state.metrics_history = pd.concat(
-        [st.session_state.metrics_history, new_row],
-        ignore_index=True
-    )
-    # Строим линейный график истории
-    history_df = st.session_state.metrics_history.set_index('Timestamp')
-    st.line_chart(history_df)
-else:
-    st.write("Ожидаем данные...")
+        st.text(np.array(st.session_state['y_true']).shape)
+        st.text(np.array(st.session_state['y_pred']).shape)
+
+        f1 = f1_score(st.session_state['y_true'], st.session_state['y_pred'], average='micro')
+        f1_scores.append(f1)
+        chart_holder_f1.line_chart(f1_scores, y_label='f1 score')
+
+        acc = accuracy_score(st.session_state['y_true'], st.session_state['y_pred'])
+        acc_scores.append(acc)
+        chart_holder_accuracy.line_chart(acc_scores, y_label='accuracy')
+
+        chart_holder_amount.line_chart(st.session_state['num_processed'], y_label='num processed')
+
+
+

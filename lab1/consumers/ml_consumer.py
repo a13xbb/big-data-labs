@@ -22,8 +22,6 @@ model.load_model(model_path)
 
 consumer = Consumer(conf_consumer)
 
-print('ML consumer running...')
-
 consumer.subscribe(['processed_data'])
 
 producer = Producer(conf_producer)
@@ -49,12 +47,14 @@ try:
         X = np.array(data['normalized_features'])
         y_true = np.array(data['y_true'])
         
-        y_pred = model.predict(X)
-
+        y_pred = np.array(model.predict(X))
+        
         processed_data = {
             'y_pred': y_pred.tolist(),
             'y_true': y_true.tolist()
         }
+
+        print(y_pred, y_true)
 
         # Отправляем обработанные данные на второй брокер в топик processed_data
         producer.produce(ml_results_topic, key=msg.key(), value=json.dumps(processed_data))

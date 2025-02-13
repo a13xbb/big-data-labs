@@ -26,7 +26,6 @@ class KafkaProducer:
             print(f"Producer {self.producer_id}: Sent - {msg.value().decode('utf-8')}")
             
     def run(self):
-        print(f'Producer {self.producer_id} running...')
         for i in range(0, len(self.df), self.batch_size):
             batch = self.df.iloc[i:min(i + self.batch_size, len(self.df))]  # Берем батч данных
             messages = batch.to_dict(orient="records")  # Преобразуем в список JSON-объектов
