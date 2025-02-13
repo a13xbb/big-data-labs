@@ -2,33 +2,33 @@ from confluent_kafka import Consumer, Producer, KafkaException, KafkaError
 import json
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+from catboost import CatBoostClassifier
+
+model_path = '/home/alex/study/big-data-labs/lab1/models/catboost_forest_cover_type.model'
 
 conf_consumer = {
     'bootstrap.servers': 'localhost:9095',  # Адрес первого брокера
-    'group.id': 'data-processing-group',
+    'group.id': 'ml-group',
     'auto.offset.reset': 'earliest'  # Начнем с самого начала
 }
 
 conf_producer = {
     'bootstrap.servers': 'localhost:9095',  # Адрес нового брокера
-    'client.id': 'processed_data_producer'
+    'client.id': 'ml_results_producer'
 }
+
+model = CatBoostClassifier()
+model.load_model(model_path)
 
 consumer = Consumer(conf_consumer)
 
-print('Processing consumer running...')
+print('ML consumer running...')
 
-consumer.subscribe(['raw_data'])
-
-scaler = StandardScaler()
-train_df = pd.read_csv('/home/alex/study/big-data-labs/lab1/data/train.csv')
-# print(train_df.columns)
-scaler.fit(train_df.drop(columns=['Cover_Type']))
+consumer.subscribe(['processed_data'])
 
 producer = Producer(conf_producer)
 
-processed_topic = 'processed_data'
+ml_results_topic = 'ml_results'
 
 try:
     while True:
@@ -46,28 +46,24 @@ try:
         print(f"Received message from producer: {msg.key().decode('utf-8')}")
         data = json.loads(msg.value().decode('utf-8'))  # Десериализуем данные
         
-        df = pd.DataFrame(data)
-        X = df.drop(columns=['Cover_Type'])
-        y = df['Cover_Type'].to_numpy()
+        X = np.array(data['normalized_features'])
+        y_true = np.array(data['y_true'])
         
-        X_norm = scaler.transform(X)
+        y_pred = model.predict(X)
 
-        # Создаем новое сообщение с обработанными данными
         processed_data = {
-            'normalized_features': X_norm.tolist(),
-            'y_true': y.tolist() # Преобразуем обратно в список
+            'y_pred': y_pred.tolist(),
+            'y_true': y_true.tolist()
         }
-        
-        print(X_norm.shape)
 
         # Отправляем обработанные данные на второй брокер в топик processed_data
-        producer.produce(processed_topic, key=msg.key(), value=json.dumps(processed_data))
+        producer.produce(ml_results_topic, key=msg.key(), value=json.dumps(processed_data))
         producer.flush()  # Убедимся, что все сообщения отправлены
 
-        print(f"Processed and sent data to topic {processed_topic}")
+        print(f"Processed and sent data to topic {ml_results_topic}")
 
+        
 except KeyboardInterrupt:
     pass
 finally:
     consumer.close() 
-

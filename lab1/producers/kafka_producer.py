@@ -5,16 +5,16 @@ import random
 from confluent_kafka import Producer
 
 TOPIC = "raw_data"
-conf = {
-    'bootstrap.servers': '127.0.0.1:9092',  # Адрес первого брокера
-    'client.id': 'first-broker'
-}
 
 class KafkaProducer:
     def __init__(self, df_path, producer_id, batch_size=32, random_delay=False):
         self.df = pd.read_csv(df_path)
+        self.conf = {
+            'bootstrap.servers': 'localhost:9095',  # Адрес первого брокера
+            'client.id': f'producer_{producer_id}'
+        }
         # print(self.df.columns)
-        self.producer = Producer(conf)
+        self.producer = Producer(self.conf)
         self.producer_id = producer_id
         self.random_delay = random_delay 
         self.batch_size = batch_size
@@ -26,6 +26,7 @@ class KafkaProducer:
             print(f"Producer {self.producer_id}: Sent - {msg.value().decode('utf-8')}")
             
     def run(self):
+        print(f'Producer {self.producer_id} running...')
         for i in range(0, len(self.df), self.batch_size):
             batch = self.df.iloc[i:min(i + self.batch_size, len(self.df))]  # Берем батч данных
             messages = batch.to_dict(orient="records")  # Преобразуем в список JSON-объектов
