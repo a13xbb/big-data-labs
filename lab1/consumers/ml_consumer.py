@@ -41,26 +41,29 @@ try:
                 raise KafkaException(msg.error())
 
         # Получаем ключ и тело сообщения
-        print(f"Received message from producer: {msg.key().decode('utf-8')}")
+        # print(f"Received message from producer: {msg.key().decode('utf-8')}")
         data = json.loads(msg.value().decode('utf-8'))  # Десериализуем данные
         
         X = np.array(data['normalized_features'])
+  
         y_true = np.array(data['y_true'])
         
-        y_pred = np.array(model.predict(X))
+        y_pred = np.array(model.predict(X)).flatten()
+
+        # from sklearn.metrics import accuracy_score
+        # print(y_true, y_pred, accuracy_score(y_true, y_pred), sep='\n')
+        # exit(0)
         
         processed_data = {
             'y_pred': y_pred.tolist(),
             'y_true': y_true.tolist()
         }
 
-        print(y_pred, y_true)
-
         # Отправляем обработанные данные на второй брокер в топик processed_data
         producer.produce(ml_results_topic, key=msg.key(), value=json.dumps(processed_data))
         producer.flush()  # Убедимся, что все сообщения отправлены
 
-        print(f"Processed and sent data to topic {ml_results_topic}")
+        # print(f"Processed and sent data to topic {ml_results_topic}")
 
         
 except KeyboardInterrupt:

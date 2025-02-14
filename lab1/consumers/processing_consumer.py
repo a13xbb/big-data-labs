@@ -21,7 +21,8 @@ consumer.subscribe(['raw_data'])
 
 scaler = StandardScaler()
 train_df = pd.read_csv('/home/alex/study/big-data-labs/lab1/data/train.csv')
-# print(train_df.columns)
+if 'Unnamed: 0' in train_df.columns:
+    train_df = train_df.drop(columns=['Unnamed: 0'])
 scaler.fit(train_df.drop(columns=['Cover_Type']))
 
 producer = Producer(conf_producer)
@@ -41,14 +42,18 @@ try:
                 raise KafkaException(msg.error())
 
         # Получаем ключ и тело сообщения
-        print(f"Received message from producer: {msg.key().decode('utf-8')}")
+        # print(f"Received message from producer: {msg.key().decode('utf-8')}")
         data = json.loads(msg.value().decode('utf-8'))  # Десериализуем данные
         
         df = pd.DataFrame(data)
+        if 'Unnamed: 0' in df.columns:
+            df = df.drop(columns=['Unnamed: 0'])
+    
         X = df.drop(columns=['Cover_Type'])
         y = df['Cover_Type'].to_numpy()
         
         X_norm = scaler.transform(X)
+
 
         # Создаем новое сообщение с обработанными данными
         processed_data = {
@@ -56,13 +61,13 @@ try:
             'y_true': y.tolist() # Преобразуем обратно в список
         }
         
-        print(X_norm.shape)
+        # print(X_norm.shape)
 
         # Отправляем обработанные данные на второй брокер в топик processed_data
         producer.produce(processed_topic, key=msg.key(), value=json.dumps(processed_data))
         producer.flush()  # Убедимся, что все сообщения отправлены
 
-        print(f"Processed and sent data to topic {processed_topic}")
+        # print(f"Processed and sent data to topic {processed_topic}")
 
 except KeyboardInterrupt:
     pass
