@@ -10,12 +10,10 @@ pkill -f streamlit
 echo "Stopping Docker containers..."
 docker-compose down
 
-echo "Cleaning up zombie processes..."
-sleep 2  # Даём время процессам завершиться
+# echo "Cleaning up zombie processes..."
+sleep 2
 
-# Проверка зомби-процессов
 ps -eo ppid,stat | grep -w 'Z' | while read ppid stat; do
-    # Если процесс в статусе 'Z', убиваем его родителя
     # echo "Killing zombie parent process: $ppid"
     kill -9 "$ppid"
 done

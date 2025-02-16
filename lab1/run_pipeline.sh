@@ -11,9 +11,9 @@ docker exec -it lab1-kafka-1 kafka-topics.sh --create --topic ml_results_data --
 
 # 4. Запускаем продюсеров в фоне
 echo "Starting Producer 1..."
-python3 producers/producer_1.py &
+python3 producers/producer_1.py --data_folder /home/alex/study/big-data-labs/lab1/data &
 echo "Starting Producer 2..."
-python3 producers/producer_2.py &
+python3 producers/producer_2.py --data_folder /home/alex/study/big-data-labs/lab1/data &
 sleep 3
 
 # 3. Запускаем консюмеры в фоне (каждый в отдельном терминальном окне или фоне)
