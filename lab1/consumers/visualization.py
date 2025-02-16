@@ -73,6 +73,7 @@ while True:
         ax.set_xticks([i + 1 for i in range(7)])
         ax.set_xticklabels(list(labels.values()), rotation=60, fontsize=7)
         hist_chart.pyplot(fig)
+        plt.close(fig)
 
         #график f1-score
         fig, ax = plt.subplots(figsize=(4, 3))
@@ -87,6 +88,7 @@ while True:
         ax.set_yticks(ticks)
         ax.set_yticklabels(list(map(str, ticks)), fontsize=8)
         chart_f1.pyplot(fig)
+        plt.close(fig)
 
         #график accuracy
         fig, ax = plt.subplots(figsize=(4, 3))
@@ -100,6 +102,7 @@ while True:
         ax.set_yticks(ticks)
         ax.set_yticklabels(list(map(str, ticks)), fontsize=8)
         chart_accuracy.pyplot(fig)
+        plt.close(fig)
 
         #confusion matrix
         cm = confusion_matrix(st.session_state['y_true'], st.session_state['y_pred'], labels=list(labels.keys()))
@@ -113,6 +116,7 @@ while True:
         ax.set_title("Confusion Matrix", fontsize=10)
 
         conf_matrix_placeholder.pyplot(fig)
+        plt.close(fig)
 
 
 
