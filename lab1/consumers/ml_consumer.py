@@ -7,13 +7,13 @@ from catboost import CatBoostClassifier
 model_path = '/home/alex/study/big-data-labs/lab1/models/catboost_forest_cover_type.model'
 
 conf_consumer = {
-    'bootstrap.servers': 'localhost:9095',  # Адрес первого брокера
+    'bootstrap.servers': 'localhost:9095',
     'group.id': 'ml-group',
-    'auto.offset.reset': 'earliest'  # Начнем с самого начала
+    'auto.offset.reset': 'earliest'
 }
 
 conf_producer = {
-    'bootstrap.servers': 'localhost:9095',  # Адрес нового брокера
+    'bootstrap.servers': 'localhost:9095',
     'client.id': 'ml_results_producer'
 }
 

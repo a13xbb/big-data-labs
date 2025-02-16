@@ -62,6 +62,7 @@ while True:
         st.session_state['y_pred'].extend(data['y_pred'])
         st.session_state['num_processed'].append(len(st.session_state['y_true']))
 
+        #гистограмма распределения классов
         class_counts = pd.Series(st.session_state['y_true']).value_counts().sort_index()
         fig, ax = plt.subplots(figsize=(4, 3))
         colors = ["red", "blue", "green", "purple", "orange", "cyan", "brown"]
@@ -73,9 +74,7 @@ while True:
         ax.set_xticklabels(list(labels.values()), rotation=60, fontsize=7)
         hist_chart.pyplot(fig)
 
-        # f1_overall = f1_score(st.session_state['y_true'], st.session_state['y_pred'], average='micro')
-        # f1_scores_overall.append(f1_overall)
-        # chart_holder_f1.line_chart(f1_scores_overall, y_label='f1 score')
+        #график f1-score
         fig, ax = plt.subplots(figsize=(4, 3))
         f1_cur = f1_score(data['y_true'], data['y_pred'], average='micro')
         f1_scores_batches.append(f1_cur)
@@ -89,6 +88,7 @@ while True:
         ax.set_yticklabels(list(map(str, ticks)), fontsize=8)
         chart_f1.pyplot(fig)
 
+        #график accuracy
         fig, ax = plt.subplots(figsize=(4, 3))
         acc_cur = accuracy_score(data['y_true'], data['y_pred'])
         acc_scores_batches.append(acc_cur)
@@ -101,9 +101,10 @@ while True:
         ax.set_yticklabels(list(map(str, ticks)), fontsize=8)
         chart_accuracy.pyplot(fig)
 
+        #confusion matrix
         cm = confusion_matrix(st.session_state['y_true'], st.session_state['y_pred'], labels=list(labels.keys()))
         
-        fig, ax = plt.subplots(figsize=(6, 4))  # Уменьшаем размер
+        fig, ax = plt.subplots(figsize=(6, 4))
         sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
         ax.set_xticklabels(list(labels.values()), rotation=60, fontsize=7)
         ax.set_yticklabels(list(labels.values()), rotation=0, fontsize=7)
@@ -111,7 +112,6 @@ while True:
         ax.set_ylabel("True labels", fontsize=7)
         ax.set_title("Confusion Matrix", fontsize=10)
 
-        # Обновляем график в Streamlit
         conf_matrix_placeholder.pyplot(fig)
 
 

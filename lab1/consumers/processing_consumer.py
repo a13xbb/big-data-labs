@@ -5,13 +5,13 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 conf_consumer = {
-    'bootstrap.servers': 'localhost:9095',  # Адрес первого брокера
+    'bootstrap.servers': 'localhost:9095',
     'group.id': 'data-processing-group',
-    'auto.offset.reset': 'earliest'  # Начнем с самого начала
+    'auto.offset.reset': 'earliest'
 }
 
 conf_producer = {
-    'bootstrap.servers': 'localhost:9095',  # Адрес нового брокера
+    'bootstrap.servers': 'localhost:9095',
     'client.id': 'processed_data_producer'
 }
 
@@ -31,20 +31,18 @@ processed_topic = 'processed_data'
 
 try:
     while True:
-        msg = consumer.poll(1.0)  # Ожидаем сообщение 1 секунду
+        msg = consumer.poll(1.0)
 
         if msg is None:
-            continue  # Нет новых сообщений, продолжаем
+            continue
         if msg.error():
             if msg.error().code() == KafkaError._PARTITION_EOF:
                 continue
             else:
                 raise KafkaException(msg.error())
 
-        # Получаем ключ и тело сообщения
-        # print(f"Received message from producer: {msg.key().decode('utf-8')}")
-        data = json.loads(msg.value().decode('utf-8'))  # Десериализуем данные
         
+        data = json.loads(msg.value().decode('utf-8'))
         df = pd.DataFrame(data)
         if 'Unnamed: 0' in df.columns:
             df = df.drop(columns=['Unnamed: 0'])
@@ -54,20 +52,13 @@ try:
         
         X_norm = scaler.transform(X)
 
-
-        # Создаем новое сообщение с обработанными данными
         processed_data = {
             'normalized_features': X_norm.tolist(),
-            'y_true': y.tolist() # Преобразуем обратно в список
+            'y_true': y.tolist()
         }
-        
-        # print(X_norm.shape)
 
-        # Отправляем обработанные данные на второй брокер в топик processed_data
         producer.produce(processed_topic, key=msg.key(), value=json.dumps(processed_data))
-        producer.flush()  # Убедимся, что все сообщения отправлены
-
-        # print(f"Processed and sent data to topic {processed_topic}")
+        producer.flush()
 
 except KeyboardInterrupt:
     pass

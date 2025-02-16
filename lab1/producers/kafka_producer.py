@@ -12,10 +12,9 @@ class KafkaProducer:
         if 'Unnamed: 0' in self.df.columns:
             self.df = self.df.drop(columns=['Unnamed: 0'])
         self.conf = {
-            'bootstrap.servers': 'localhost:9095',  # Адрес первого брокера
+            'bootstrap.servers': 'localhost:9095',
             'client.id': f'producer_{producer_id}'
         }
-        # print(self.df.columns)
         self.producer = Producer(self.conf)
         self.producer_id = producer_id
         self.random_delay = random_delay 
