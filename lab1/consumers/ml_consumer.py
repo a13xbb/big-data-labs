@@ -2,9 +2,22 @@ from confluent_kafka import Consumer, Producer, KafkaException, KafkaError
 import json
 import numpy as np
 import pandas as pd
+import argparse
 from catboost import CatBoostClassifier
 
-model_path = '/home/alex/study/big-data-labs/lab1/models/catboost_forest_cover_type.model'
+def parse_args():
+    parser = argparse.ArgumentParser(description="ML Consumer")
+    parser.add_argument(
+        '--model_path', 
+        type=str, 
+        default='./catboost_forest_cover_type.model',
+        help="Path to the data folder"
+    )
+    return parser.parse_args()
+
+args = parse_args()
+
+model_path = args.model_path
 
 conf_consumer = {
     'bootstrap.servers': 'localhost:9095',

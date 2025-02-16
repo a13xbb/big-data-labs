@@ -18,10 +18,10 @@ sleep 3
 
 # 3. Запускаем консюмеры в фоне (каждый в отдельном терминальном окне или фоне)
 echo "Starting processing consumer..."
-python3 consumers/processing_consumer.py &
+python3 consumers/processing_consumer.py --data_folder /home/alex/study/big-data-labs/lab1/data &
 sleep 3
 echo "Starting ML consumer..."
-python3 consumers/ml_consumer.py &
+python3 consumers/ml_consumer.py --model_path /home/alex/study/big-data-labs/lab1/models/catboost_forest_cover_type.model &
 sleep 3
 
 echo "Starting visualization consumer..."

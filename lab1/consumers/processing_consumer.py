@@ -2,7 +2,19 @@ from confluent_kafka import Consumer, Producer, KafkaException, KafkaError
 import json
 import numpy as np
 import pandas as pd
+import argparse
 from sklearn.preprocessing import StandardScaler
+import os
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Processing Consumer")
+    parser.add_argument(
+        '--data_folder', 
+        type=str, 
+        default='./data',
+        help="Path to the data folder"
+    )
+    return parser.parse_args()
 
 conf_consumer = {
     'bootstrap.servers': 'localhost:9095',
@@ -15,12 +27,14 @@ conf_producer = {
     'client.id': 'processed_data_producer'
 }
 
+args = parse_args()
+
 consumer = Consumer(conf_consumer)
 
 consumer.subscribe(['raw_data'])
 
 scaler = StandardScaler()
-train_df = pd.read_csv('/home/alex/study/big-data-labs/lab1/data/train.csv')
+train_df = pd.read_csv(os.path.join(args.data_folder, 'train.csv'))
 if 'Unnamed: 0' in train_df.columns:
     train_df = train_df.drop(columns=['Unnamed: 0'])
 scaler.fit(train_df.drop(columns=['Cover_Type']))
