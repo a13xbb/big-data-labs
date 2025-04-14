@@ -3,7 +3,7 @@
    Внутри эти скрипты запускают docker-compose файлы и копируют csv файл в файловую систему hadoop, csv файл должен лежать в корне проекта.
 3) src/spark_app.py - приложение на pyspark с обработкой csv-файла.
 4) Запустить spark_app.py можно с помощью команды
-   docker exec -it spark-master spark-submit --master spark://spark-master:7077 spark_app.py -d hdfs://namenode:9000/{filename}.csv
+   docker exec -it spark-master spark-submit --master spark://spark-master:7077 spark_app.py -d hdfs://namenode:9000/{filename}.csv <br>
    Ключи: -d/--data_path - путь до csv файла, -o/--optimized - использовать ли оптимизации в spark приложении.
 5) В файле plots.ipynb представлены графики для времени исполнения программы и использования памяти.
 
