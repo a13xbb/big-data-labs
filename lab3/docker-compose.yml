@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  spark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spark
+    volumes:
+      - ./etl_pipeline.py:/app/etl_pipeline.py
+      - ./bronze_loader.py:/app/bronze_loader.py
+      - ./data:/app/data
+    working_dir: /app
+    command: tail -f /dev/null
