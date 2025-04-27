@@ -4,7 +4,13 @@ sudo rm -rf data/bronze/bronze_table
 sudo rm -rf data/silver/silver_table
 sudo rm -rf data/gold/gold_table
 
-docker compose up -d
+docker compose up -d --build
+
+# docker exec -t spark pip install numpy
+# docker exec -t spark pip install xgboost
+# docker exec -t spark pip install mlflow
+
+mlflow ui
 
 docker exec -t spark spark-submit --packages io.delta:delta-spark_2.12:3.2.0 \
  --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:/opt/spark/conf/log4j.properties" \

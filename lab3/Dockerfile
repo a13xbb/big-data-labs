@@ -25,6 +25,11 @@ RUN set -ex; \
     rm -rf /var/lib/apt/lists/*
 # Install PySpark
 RUN pip3 install pyspark
+RUN pip3 install xgboost
+RUN pip3 install lightgbm
+RUN pip3 install mlflow
+RUN pip3 install numpy
+
 USER root
 # Add PySpark to PATH for the spark user
 ENV PATH=$PATH:/home/spark/.local/bin
@@ -33,7 +38,7 @@ RUN export JAVA_HOME=/opt/java/openjdk
 RUN export PYSPARK_PYTHON=$(which python3)
 RUN export SPARK_VERSION=3.5
 
-RUN pip3 install delta-spark==3.2.0
+RUN pip install delta-spark==3.2.0
 
 RUN mkdir -p /opt/spark/conf
 

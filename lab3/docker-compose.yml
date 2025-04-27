@@ -10,5 +10,8 @@ services:
       - ./etl_pipeline.py:/app/etl_pipeline.py
       - ./bronze_loader.py:/app/bronze_loader.py
       - ./data:/app/data
+      - ./mlruns:/app/mlruns
     working_dir: /app
     command: tail -f /dev/null
+    ports:
+      - "5000:5000"
