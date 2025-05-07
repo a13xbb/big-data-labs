@@ -10,7 +10,7 @@ docker compose up -d --build
 # docker exec -t spark pip install xgboost
 # docker exec -t spark pip install mlflow
 
-mlflow ui
+mlflow ui --port 5001
 
 docker exec -t spark spark-submit --packages io.delta:delta-spark_2.12:3.2.0 \
  --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:/opt/spark/conf/log4j.properties" \

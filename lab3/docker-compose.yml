@@ -7,8 +7,8 @@ services:
       dockerfile: Dockerfile
     container_name: spark
     volumes:
-      - ./etl_pipeline.py:/app/etl_pipeline.py
-      - ./bronze_loader.py:/app/bronze_loader.py
+      - ./src/etl_pipeline.py:/app/etl_pipeline.py
+      - ./src/bronze_loader.py:/app/bronze_loader.py
       - ./data:/app/data
       - ./mlruns:/app/mlruns
     working_dir: /app

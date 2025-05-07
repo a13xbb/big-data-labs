@@ -144,7 +144,7 @@ with mlflow.start_run():
     model.fit(
         X_train, y_train,
         eval_set=[(X_train, y_train), (X_valid, y_valid)],
-        verbose=True  # чтобы выводилось каждое дерево
+        verbose=True
     )
     
     mlflow.log_params(params)
@@ -188,12 +188,9 @@ with mlflow.start_run():
         plt.legend()
         plt.grid()
 
-        # Сохраним график во временный файл
         plot_path = f"{metric_name}_plot.png"
         plt.savefig(plot_path)
         plt.close()
 
-        # Логируем график в MLflow
-        # mlflow.log_artifact(plot_path)
 
 
