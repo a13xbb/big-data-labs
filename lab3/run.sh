@@ -10,7 +10,7 @@ sudo mkdir data/gold
 
 docker compose up -d --build
 
-mlflow ui --port 5001
+mlflow ui --port 5000
 
 docker exec -t spark spark-submit --packages io.delta:delta-spark_2.12:3.2.0 \
  --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:/opt/spark/conf/log4j.properties" \
