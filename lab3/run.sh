@@ -1,8 +1,12 @@
 docker compose down
 
-sudo rm -rf data/bronze/bronze_table
-sudo rm -rf data/silver/silver_table
-sudo rm -rf data/gold/gold_table
+sudo rm -rf data/bronze
+sudo rm -rf data/silver
+sudo rm -rf data/gold
+
+sudo mkdir data/bronze
+sudo mkdir data/silver
+sudo mkdir data/gold
 
 docker compose up -d --build
 
